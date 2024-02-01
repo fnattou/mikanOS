@@ -3,3 +3,4 @@
 *.inf
 *.dec
 *.dsc
+.*.d
