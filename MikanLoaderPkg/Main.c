@@ -305,6 +305,11 @@ EFI_STATUS EFIAPI UefiMain(
   //-------------------------------------
   // Exit BootServices
   //-------------------------------------
+  PrintAndHaltIfError(
+    gBS->FreePool(kernel_buffer),
+    L"free pool"
+  );
+  
   status = gBS->ExitBootServices(image_handle, memmap.map_key);
   if (EFI_ERROR(status)) {
     status = GetMemoryMap(&memmap);
