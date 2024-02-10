@@ -2,6 +2,9 @@
 #include <cstddef>
 #include <cstdio>
 
+#include <numeric>
+#include <vector>
+
 #include "frame_buffer_config.hpp"
 #include "graphics.hpp"
 #include "mouse.hpp"
@@ -9,14 +12,15 @@
 #include "console.hpp"
 #include "pci.hpp"
 #include "logger.hpp"
-#include "interrupt.hpp"
-#include "asmfunc.h"
-
 #include "usb/memory.hpp"
 #include "usb/device.hpp"
 #include "usb/classdriver/mouse.hpp"
 #include "usb/xhci/xhci.hpp"
 #include "usb/xhci/trb.hpp"
+#include "interrupt.hpp"
+#include "asmfunc.h"
+#include "queue.hpp"
+
 
 const PixelColor kDesktopBGColor{45, 118, 237};
 const PixelColor kDesktopFGColor{255, 255, 255};
@@ -68,14 +72,16 @@ void SwitchEhci2Xhci(const pci::Device& xhc_dev) {
 
 usb::xhci::Controller* xhc;
 
+struct Message {
+    enum Type {
+        kInterruptXHCI,
+    } type;
+};
+ArrayQueue<Message>* main_queue;
+
 __attribute__((interrupt))
 void IntHandlerXHCI(InterruptFrame* frame) {
-    while (xhc->PrimaryEventRing()->HasFront()) {
-        if (auto err = ProcessEvent(*xhc)) {
-            Log(kError, "Error while ProcessEvent: %s at %s:%d\n", 
-                err.Name(), err.File(), err.Line());
-        }
-    }
+    main_queue->Push(Message{Message::kInterruptXHCI});
     NotifyEndOfInterrupt();
 }
 
@@ -119,6 +125,10 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
     mouse_cursor = new(mouse_cursor_buf) MouseCursor{
         pixel_writer, kDesktopBGColor, {300, 200}
     };
+
+    std::array<Message, 32> main_queue_data;
+    ArrayQueue<Message> main_queue(main_queue_data);
+    ::main_queue = &main_queue;
     
     auto err = pci::ScanAllBus();
     Log(kDebug, "ScanAllBus: %s, Device num: %d\n", err.Name(), pci::num_device);
@@ -180,6 +190,8 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
 
     Log(kInfo, "xHC starting\n");
     xhc.Run();
+
+    ::xhc = &xhc;
     
     usb::HIDMouseDriver::default_observer = MouseObserver;
     for (int i = 1; i <= xhc.MaxPorts(); ++i) {
@@ -194,14 +206,33 @@ extern "C" void KernelMain(const FrameBufferConfig& frame_buffer_config) {
         }
     }
 
-    while(1) {
-        if (auto err = ProcessEvent(xhc)) {
-           Log(kError, "Error while ProcessEvent: %s at %s:%d\n", 
-                err.Name(), err.File(), err.Line()); 
+    while (true) {
+        // 割り込みを禁止する
+        __asm__("cli");
+        if (main_queue.Count() == 0) {
+            // 何も割り込みキューがなかった場合、割り込み許可にして停止
+            __asm__("sti\n\thlt");
+            // 次の割り込み開始時、ここから始まってループの先頭へ
+            continue;
+        }
+
+        Message msg = main_queue.Front();
+        main_queue.Pop();
+        __asm__("sti");
+        switch (msg.type)
+        {
+        case Message::kInterruptXHCI:
+            while (xhc.PrimaryEventRing()->HasFront()) {
+                if (auto err = ProcessEvent(xhc)) {
+                    Log(kError, "Error while ProcessEvent: %s at %s:%d\n",
+                    err.Name(), err.File(), err.Line());
+                }
+            }
+            break;
+        default:
+            Log(kError, "Unknown message type: %d\n", msg.type);
         }
     }
-
-    while(1) __asm__("hlt");
 }
 
 extern "C" void __cxa_pure_virtual() {
