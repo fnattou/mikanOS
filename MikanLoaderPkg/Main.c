@@ -10,7 +10,7 @@
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
 #include  "frame_buffer_config.hpp"
-#include "memory_map.hpp"
+#include "../kernel/memory_map.hpp"
 #include  "elf.hpp"
 
 EFI_STATUS GetMemoryMap(struct MemoryMap* map) {
