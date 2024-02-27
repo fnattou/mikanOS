@@ -27,7 +27,7 @@ WithError<FrameID> BitmapMemoryManager::Allocate(size_t num_frames) {
     size_t current_start_frame_id = range_begin_.ID();
     while(true) {
         size_t result = countContinuousFreeFrame(current_start_frame_id);
-        if (result = num_frames) {
+        if (result == num_frames) {
             MarkAllocated(FrameID{current_start_frame_id}, num_frames);
             return {FrameID{current_start_frame_id}, MAKE_ERROR(Error::kSuccess)};
         }
