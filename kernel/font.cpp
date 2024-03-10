@@ -26,7 +26,7 @@ void WriteAscii(PixelWriter& writer, int x, int y, char c, const PixelColor& col
   for (int dy = 0; dy < 16; ++dy) {
     for (int dx = 0; dx < 8; ++dx) {
       if ((font[dy] << dx) & 0x80u) {
-        writer.Write(x + dx, y + dy, color);
+        writer.Write(Vector2D<int>{x, y} + Vector2D<int>{dx, dy}, color);
       }
     }
   }
