@@ -13,7 +13,6 @@ Error FrameBuffer::Initialize(const FrameBufferConfig& config) {
     } else {
         const size_t bufferBytes = ((bits_per_pixel + 7) / 8) * 
             config_.horizontal_resolution * config_.vertical_resolution;
-        buffer_.reserve(bufferBytes);
         buffer_.resize(bufferBytes);
         config_.frame_buffer = buffer_.data();
         config_.pixels_per_scan_line = config_.horizontal_resolution;
