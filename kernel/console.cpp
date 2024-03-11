@@ -39,7 +39,11 @@ void Console::Newline() {
     cursor_column_ = 0;
     if (cursor_row_ < kRows - 1) {
         ++cursor_row_;
-    } else {
+        return;
+    } 
+    
+    if (window_)
+    {
         for (int y = 0; y < 16 * kRows; ++y) {
             for (int x = 0; x < 8 * kColumns; ++x) {
                 writer_->Write(Vector2D<int>{x, y},  bg_color_);

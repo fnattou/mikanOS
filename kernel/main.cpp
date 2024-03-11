@@ -48,6 +48,12 @@ int printk(const char* format, ...) {
     result = vsprintf(s, format, ap);
     va_end(ap);
 
+    StartLAPICTimer();
+    console->PutString(s);
+    uint32_t elapsed = LAPICTimerElapsed();
+    StopLAPICTimer();
+
+    sprintf(s, "[%9d]", elapsed);
     console->PutString(s);
     return result;
 }
