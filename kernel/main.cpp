@@ -266,6 +266,7 @@ extern "C" void KernelMainNewStack(
 
     DrawDesktop(*bgwriter);
     console->SetWindow(bgwindow);
+
     auto mouse_window = std::make_shared<Window>(
         kMouseCursorWidth, kMouseCursorHeight, frame_buffer_config.pixel_format
     );
@@ -275,11 +276,9 @@ extern "C" void KernelMainNewStack(
     mouse_position = mouse_init_pos;
 
     auto main_window = std::make_shared<Window>(
-        160, 68, frame_buffer_config.pixel_format
+        160, 52, frame_buffer_config.pixel_format
     );
     DrawWindow(*main_window->Writer(), "Hello Window");
-    WriteString(*main_window->Writer(), {24, 28}, "Welcome to", {0, 0, 0});
-    WriteString(*main_window->Writer(), {24, 44}, "MikanOS world!", {0, 0, 0});
 
     FrameBuffer screen;
     if (const Error err = screen.Initialize(frame_buffer_config)) {
@@ -308,14 +307,21 @@ extern "C" void KernelMainNewStack(
     layer_manager->UpDown(main_window_layer_id, 1);
     layer_manager->Draw();
 
+    char str[128];
+    unsigned int count = 0;
 
     while (true) {
+        // show count
+        ++count;
+        sprintf(str, "%010u", count);
+        FillRectangle(*main_window->Writer(), {24, 28}, {8 * 10, 16}, {0xc6, 0xc6, 0xc6});
+        WriteString(*main_window->Writer(), {24, 28}, str, {0, 0, 0});
+        layer_manager->Draw();
+
         // 割り込みを禁止する
         __asm__("cli");
         if (main_queue.Count() == 0) {
-            // 何も割り込みキューがなかった場合、割り込み許可にして停止
-            __asm__("sti\n\thlt");
-            // 次の割り込み開始時、ここから始まってループの先頭へ
+            __asm__("sti");
             continue;
         }
 
