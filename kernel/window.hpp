@@ -44,7 +44,7 @@ public:
     /// @brief 与えられたPixelWriterにこのウィンドウの表示領域を描画する 
     /// @param writer 描画先
     /// @param position writerの左上を基準とした描画位置
-    void DrawTo(FrameBuffer& writer, Vector2D<int> position);
+    void DrawTo(FrameBuffer& writer, Vector2D<int> pos, const Rectangle<int>& area);
     /// @brief 透過色を設定する
     void SetTransparentColor(std::optional<PixelColor> c);
     /// @brief このインスタンスに紐づいたWindowWriterを取得する
@@ -58,6 +58,8 @@ public:
     int Width() const;
     /// @brief 平面描画領域の高さをピクセル単位で返す
     int Height() const;
+    /// @brief 平面描画領域のサイズをピクセル単位で返す
+    Vector2D<int> Size() const;
 
     /** @brief このウィンドウの平面描画領域内で，矩形領域を移動する。
      *
