@@ -74,6 +74,8 @@ public:
     void UpDown(unsigned int id, int new_height);
     void Hide(unsigned int id);
 
+    /** @brief 指定された座標にウィンドウを持つ最も上に表示されているレイヤーを探す。 */
+    Layer* FindLayerByPosition(Vector2D<int> pos, unsigned int exclude_id) const;
 private:
     FrameBuffer* screen_{nullptr};
     mutable FrameBuffer back_buffer_{};
