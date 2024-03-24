@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include "asmfunc.h"
 #include "logger.hpp"
 
 namespace
@@ -64,6 +65,23 @@ namespace acpi {
 
     size_t XSDT::Count() const {
         return (this->header.length - sizeof(DescriptionHeader)) /sizeof(uint64_t);
+    }
+
+    const FADT* fadt;
+
+    void WaitMilliseconds(unsigned long msec) {
+        const bool pm_timer_32 = (fadt->flags >> 8) & 1;
+        const uint32_t start = IoIn32(fadt->pm_tmr_blk);
+        uint32_t end = start + kPMTimerFreq * msec / 1000;
+        if (!pm_timer_32) {
+            end &= 0x00ff'ffffu;
+        }
+
+        // endがoverflowした場合はカウンタがオーバフローするのを待つ
+        if (end < start) {
+            while (IoIn32(fadt->pm_tmr_blk) >= start);
+        }
+        while (IoIn32(fadt->pm_tmr_blk) < end);
     }
 
     void Initialize(const RSDP& rsdp) {

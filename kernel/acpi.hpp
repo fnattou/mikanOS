@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 namespace acpi {
     struct RSDP {
@@ -52,7 +53,10 @@ namespace acpi {
         uint32_t flags;
         char reserved3[276 - 116];
     } __attribute__((packed));
-    extern const FADT* fadt;
 
+    extern const FADT* fadt;
+    const int kPMTimerFreq = 3579545;
+
+    void WaitMilliseconds(unsigned long msec);
     void Initialize(const RSDP& rsdp);
 }
