@@ -93,7 +93,8 @@ unsigned long lapic_timer_freq;
 void LAPICTimerOnInterrupt() {
     const bool task_timer_timeout = timer_manager->Tick();
     NotifyEndOfInterrupt();
+
     if (task_timer_timeout) {
-        SwitchTask();
+        task_manager->SwitchTask();
     }
 }
