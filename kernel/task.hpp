@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+#include <memory>
 
 struct TaskContext {
   uint64_t cr3, rip, rflags, reserved1; // offset 0x00
