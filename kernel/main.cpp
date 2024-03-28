@@ -132,7 +132,7 @@ void InitializeTaskBWindow() {
 }
 
 void TaskB(uint64_t task_id, int64_t data) {
-    printk("TaskB: task_id=%d, data=%lu\n", task_id, data);
+    printk("TaskB: task_id=%lu, data=%lu\n", task_id, data);
     char str[128];
     int count = 0;
     while (true) {
@@ -142,11 +142,6 @@ void TaskB(uint64_t task_id, int64_t data) {
         WriteString(*task_b_window->Writer(), {24, 28}, str, {0, 0, 0});
         layer_manager->Draw(task_b_window_layer_id);
     }
-}
-
-void TaskIdle(uint64_t task_id, int64_t data) {
-    printk("TaskIdle: task_id=%lu, data=%lx\n", task_id, data);
-    while (true) __asm__("hlt");
 }
 
 alignas(16) uint8_t kernel_main_stack[1024 * 1024];
@@ -181,9 +176,7 @@ extern "C" void KernelMainNewStack(
 
     const int kTextboxCursorTimer = 1;
     const int kTimer05Sec = static_cast<int>(kTimerFreq * 0.5);
-    __asm__("cli");
     timer_manager->AddTimer(Timer{kTimer05Sec, kTextboxCursorTimer});
-    __asm__("sti");
     bool textbox_cursor_visible= false;
 
     InitializeTask();
@@ -192,8 +185,6 @@ extern "C" void KernelMainNewStack(
         .InitContext(TaskB, 45)
         .Wakeup()
         .ID();
-    task_manager->NewTask().InitContext(TaskIdle, 0xdeadbeef).Wakeup();
-    task_manager->NewTask().InitContext(TaskIdle, 0xcafebabe).Wakeup();
 
     usb::xhci::Initialize();
     InitializeKeyboard();
