@@ -132,7 +132,7 @@ void InitializeTaskBWindow() {
 }
 
 void TaskB(uint64_t task_id, int64_t data) {
-    printk("TaskB: task_id=%d, data=%d\n", task_id, data);
+    printk("TaskB: task_id=%d, data=%lu\n", task_id, data);
     char str[128];
     int count = 0;
     while (true) {
