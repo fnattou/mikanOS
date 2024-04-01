@@ -35,10 +35,10 @@ constexpr InterruptDescriptorAttribute MakeIDTAttr(
     DescriptorType type,
     uint8_t descriptor_privilege_level,
     bool present = true,
-    uint8_t interrpt_stack_table = 0){
+    uint8_t interrupt_stack_table = 0) {
     
     InterruptDescriptorAttribute attr{};
-    attr.bits.interrupt_stack_table = interrpt_stack_table;
+    attr.bits.interrupt_stack_table = interrupt_stack_table;
     attr.bits.type = type;
     attr.bits.descriptor_privilege_level = descriptor_privilege_level;
     attr.bits.present = present;

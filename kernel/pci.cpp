@@ -194,6 +194,11 @@ namespace pci {
         return ReadData() & 0xffffu;
     }
 
+    uint16_t ReadDeviceId(uint8_t bus, uint8_t device, uint8_t function) {
+        WriteAddress(MakeAddress(bus, device, function, 0x00));
+        return ReadData() >> 16;
+    }
+
     uint8_t ReadHeaderType(uint8_t bus, uint8_t device, uint8_t function) {
         WriteAddress(MakeAddress(bus, device, function, 0x0c));
         return (ReadData() >> 16) & 0xffu;
@@ -225,7 +230,7 @@ namespace pci {
             return ScanBus(0);
         }
 
-        for (uint8_t function = 1; function < 8; ++function) {
+        for (uint8_t function = 0; function < 8; ++function) {
             if (ReadVendorId(0, 0, function) == 0xffffu) {
                 continue;
             }

@@ -251,8 +251,7 @@ void InitializeLayer() {
 
 void ProcessLayerMessage(const Message& msg) {
     const auto& arg = msg.arg.layer;
-    switch (arg.op)
-    {
+    switch (arg.op) {
     case LayerOperation::Move:
         layer_manager->Move(arg.layer_id, {arg.x, arg.y});
         break;
@@ -261,8 +260,6 @@ void ProcessLayerMessage(const Message& msg) {
         break;
     case LayerOperation::Draw:
         layer_manager->Draw(arg.layer_id);
-        break;
-    default:
         break;
     }
 }

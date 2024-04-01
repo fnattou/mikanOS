@@ -51,9 +51,10 @@ public:
     /// @brief このインスタンスに紐づいたWindowWriterを取得する
     WindowWriter* Writer();
 
-    void Write(Vector2D<int> pos, PixelColor c);
     /// @brief 指定した位置のピクセルを返す
     const PixelColor& At(int x, int y) const;
+    /// @brief 指定した位置にピクセルを書き込む
+    void Write(Vector2D<int> pos, PixelColor c);
 
     /// @brief 平面描画領域の横幅をピクセル単位で返す
     int Width() const;
@@ -85,6 +86,8 @@ class ToplevelWindow : public Window {
 public:
     static constexpr Vector2D<int> kTopLeftMargin{4, 24};
     static constexpr Vector2D<int> kBottomRightMargin{4, 4};
+    static constexpr int kMarginX = kTopLeftMargin.x + kBottomRightMargin.x;
+    static constexpr int kMarginY = kTopLeftMargin.y + kBottomRightMargin.y;
 
     class InnerAreaWriter : public PixelWriter{
     public:
@@ -93,11 +96,9 @@ public:
             window_.Write(pos + kTopLeftMargin, c);
         }
         virtual int Width() const override {
-            return window_.Width() - kTopLeftMargin.x - kBottomRightMargin.x;
-        }
+            return window_.Width() - kTopLeftMargin.x - kBottomRightMargin.x; }
         virtual int Height() const override {
-            return window_.Height() - kTopLeftMargin.y - kBottomRightMargin.y;
-        }
+            return window_.Height() - kTopLeftMargin.y - kBottomRightMargin.y; }
     private:
         ToplevelWindow& window_;
     };
@@ -116,4 +117,5 @@ private:
 
 void DrawWindow(PixelWriter& writer, const char* title);
 void DrawTextbox(PixelWriter& writer, Vector2D<int> pos, Vector2D<int> size);
+void DrawTerminal(PixelWriter& writer, Vector2D<int> pos, Vector2D<int> size);
 void DrawWindowTitle(PixelWriter& writer, const char* title, bool active);
