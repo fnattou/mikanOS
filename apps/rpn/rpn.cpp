@@ -2,8 +2,6 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "../../kernel/logger.hpp"
-
 int stack_ptr;
 long stack[100];
 
@@ -18,7 +16,9 @@ void Push(long value) {
   stack[stack_ptr] = value;
 }
 
-extern "C" int main(int argc, char** argv) {
+extern "C" void SyscallExit(int exit_code);
+
+extern "C" void main(int argc, char** argv) {
   stack_ptr = -1;
   for (int i = 1; i < argc; ++i) {
     if (strcmp(argv[i], "+") == 0) {
@@ -40,5 +40,5 @@ extern "C" int main(int argc, char** argv) {
     result = Pop();
   }
   printf("%ld\n", result);
-  while (1);
+  SyscallExit(static_cast<int>(result));
 }
